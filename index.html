@@ -38,14 +38,14 @@
   <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     // ✅ Correct Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyBB4cqQQ2aYpHftMldsoqE5s-vyfiBKRtQ",
       authDomain: "g-latency-4f42c.firebaseapp.com",
       projectId: "g-latency-4f42c",
-      storageBucket: "g-latency-4f42c.appspot.com", // ✅ fixed
+      storageBucket: "g-latency-4f42c.appspot.com",
       messagingSenderId: "967711061635",
       appId: "1:967711061635:web:92144a530baa967f86cdb6",
       measurementId: "G-QBTFWLQ5X8"
@@ -112,6 +112,27 @@
       return speedMbps;
     }
 
+    // ✅ Load saved data from Firestore on page load
+    async function loadData() {
+      let table = document.getElementById("dataTable");
+      const querySnapshot = await getDocs(collection(db, "network_data"));
+      querySnapshot.forEach((doc) => {
+        let data = doc.data();
+        let row = table.insertRow();
+        row.insertCell(0).innerText = data.sl_no;
+        row.insertCell(1).innerText = data.latitude;
+        row.insertCell(2).innerText = data.longitude;
+        row.insertCell(3).innerText = data.time;
+        row.insertCell(4).innerText = data.area;
+        row.insertCell(5).innerText = data.network;
+        row.insertCell(6).innerText = data.device;
+        row.insertCell(7).innerText = data.ping;
+        row.insertCell(8).innerText = data.latency;
+        row.insertCell(9).innerText = data.speed;
+        counter = Math.max(counter, data.sl_no + 1); // keep counter in sync
+      });
+    }
+
     document.getElementById("collectBtn").onclick = async () => {
       if (!navigator.geolocation) {
         alert("Geolocation not supported");
@@ -132,7 +153,7 @@
         // Insert into table
         let table = document.getElementById("dataTable");
         let row = table.insertRow();
-        row.insertCell(0).innerText = counter++;
+        row.insertCell(0).innerText = counter;
         row.insertCell(1).innerText = lat.toFixed(6);
         row.insertCell(2).innerText = lon.toFixed(6);
         row.insertCell(3).innerText = time;
@@ -146,7 +167,7 @@
         // ✅ Save to Firestore
         try {
           await addDoc(collection(db, "network_data"), {
-            sl_no: counter - 1,
+            sl_no: counter,
             latitude: lat.toFixed(6),
             longitude: lon.toFixed(6),
             time: time,
@@ -161,6 +182,8 @@
         } catch (err) {
           console.error("Error saving data:", err);
         }
+
+        counter++;
       }, () => {
         alert("Location access denied. Please enable location.");
       });
@@ -194,6 +217,9 @@
         counter--;
       }
     };
+
+    // ✅ Load Firestore data when page loads
+    window.onload = loadData;
   </script>
 </body>
 </html>
