@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,7 +39,7 @@
   <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     // ✅ Correct Firebase config
     const firebaseConfig = {
@@ -112,24 +113,31 @@
       return speedMbps;
     }
 
-    // ✅ Load saved data from Firestore on page load
-    async function loadData() {
+    // ✅ Real-time listener to Firestore
+    function loadData() {
       let table = document.getElementById("dataTable");
-      const querySnapshot = await getDocs(collection(db, "network_data"));
-      querySnapshot.forEach((doc) => {
-        let data = doc.data();
-        let row = table.insertRow();
-        row.insertCell(0).innerText = data.sl_no;
-        row.insertCell(1).innerText = data.latitude;
-        row.insertCell(2).innerText = data.longitude;
-        row.insertCell(3).innerText = data.time;
-        row.insertCell(4).innerText = data.area;
-        row.insertCell(5).innerText = data.network;
-        row.insertCell(6).innerText = data.device;
-        row.insertCell(7).innerText = data.ping;
-        row.insertCell(8).innerText = data.latency;
-        row.insertCell(9).innerText = data.speed;
-        counter = Math.max(counter, data.sl_no + 1); // keep counter in sync
+
+      onSnapshot(collection(db, "network_data"), (snapshot) => {
+        // Clear table except header
+        while (table.rows.length > 1) table.deleteRow(1);
+
+        snapshot.forEach((docSnap) => {
+          let data = docSnap.data();
+          let row = table.insertRow();
+          row.setAttribute("data-id", docSnap.id); // Store Firestore ID
+          row.insertCell(0).innerText = data.sl_no;
+          row.insertCell(1).innerText = data.latitude;
+          row.insertCell(2).innerText = data.longitude;
+          row.insertCell(3).innerText = data.time;
+          row.insertCell(4).innerText = data.area;
+          row.insertCell(5).innerText = data.network;
+          row.insertCell(6).innerText = data.device;
+          row.insertCell(7).innerText = data.ping;
+          row.insertCell(8).innerText = data.latency;
+          row.insertCell(9).innerText = data.speed;
+
+          counter = Math.max(counter, data.sl_no + 1);
+        });
       });
     }
 
@@ -150,21 +158,6 @@
         let latency = await measureLatency();
         let speed = await measureSpeed();
 
-        // Insert into table
-        let table = document.getElementById("dataTable");
-        let row = table.insertRow();
-        row.insertCell(0).innerText = counter;
-        row.insertCell(1).innerText = lat.toFixed(6);
-        row.insertCell(2).innerText = lon.toFixed(6);
-        row.insertCell(3).innerText = time;
-        row.insertCell(4).innerText = area;
-        row.insertCell(5).innerText = network;
-        row.insertCell(6).innerText = device;
-        row.insertCell(7).innerText = ping;
-        row.insertCell(8).innerText = latency;
-        row.insertCell(9).innerText = speed;
-
-        // ✅ Save to Firestore
         try {
           await addDoc(collection(db, "network_data"), {
             sl_no: counter,
@@ -178,12 +171,10 @@
             latency: latency,
             speed: speed
           });
-          console.log("Data saved to Firestore");
+          counter++;
         } catch (err) {
           console.error("Error saving data:", err);
         }
-
-        counter++;
       }, () => {
         alert("Location access denied. Please enable location.");
       });
@@ -210,11 +201,14 @@
       document.body.removeChild(a);
     };
 
-    document.getElementById("deleteBtn").onclick = () => {
+    document.getElementById("deleteBtn").onclick = async () => {
       let table = document.getElementById("dataTable");
       if (table.rows.length > 1) {
-        table.deleteRow(table.rows.length - 1);
-        counter--;
+        let lastRow = table.rows[table.rows.length - 1];
+        let docId = lastRow.getAttribute("data-id");
+        if (docId) {
+          await deleteDoc(doc(db, "network_data", docId));
+        }
       }
     };
 
