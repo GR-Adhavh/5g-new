@@ -144,7 +144,7 @@ zc
 zhalfalpha=qnorm(1-(a/2))
 zhalfalpha
 c(-zhalfalpha,zhalfalpha)
-pval=2*pnorm(za)
+pval=2*pnorm(abs(zc))
 if(pval>a){print("Accept null hypothesis")}
 
 p1=0.20
