@@ -1,219 +1,163 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Network Data Collection App</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    button { margin: 10px; padding: 15px 25px; font-size: 16px; border-radius: 8px; cursor: pointer; }
-    #deleteBtn { background: #e74c3c; color: white; }
-    #collectBtn { background: #2ecc71; color: white; }
-    #downloadBtn { background: #3498db; color: white; }
-  </style>
+<title>R Codes</title>
 </head>
 <body>
-  <h1>📡 Network Data Collection</h1>
+<pre>
+#generating datapoints
+1:10
+c('1','q','2','1','1')
 
-  <button id="collectBtn">Collect Data</button>
-  <button id="downloadBtn">Download CSV</button>
-  <button id="deleteBtn">Delete Last Row</button>
+Data handling
+empid = c(1, 2, 3, 4, 5)
+age = c(30, 25, 45, 32, 20)
+gender = c(0, 1, 1, 0, 1)
+status = c(1, 1, 2, 2, 1)
 
-  <table id="dataTable">
-    <tr>
-      <th>Sl No</th>
-      <th>Latitude</th>
-      <th>Longitude</th>
-      <th>Time</th>
-      <th>Area</th>
-      <th>Network Type</th>
-      <th>Device</th>
-      <th>Ping (ms)</th>
-      <th>Latency (ms)</th>
-      <th>Speed (Mbps)</th>
-    </tr>
-  </table>
+empinfo = data.frame(empid, age, gender, status)
 
-  <!-- Firebase SDKs -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+empinfo$gender = factor(empinfo$gender,
+                         levels = c(0, 1),
+                         labels = c("female", "male"))
 
-    // ✅ Correct Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyBB4cqQQ2aYpHftMldsoqE5s-vyfiBKRtQ",
-      authDomain: "g-latency-4f42c.firebaseapp.com",
-      projectId: "g-latency-4f42c",
-      storageBucket: "g-latency-4f42c.appspot.com",
-      messagingSenderId: "967711061635",
-      appId: "1:967711061635:web:92144a530baa967f86cdb6",
-      measurementId: "G-QBTFWLQ5X8"
-    };
+empinfo$status = factor(empinfo$status,
+                         levels = c(1, 2),
+                         labels = c("faculty", "student"))
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+male=subset(empinfo,empinfo$gender=="male")
+summary(empinfo)
+table1=table(empinfo$gender)
+table1
 
-    let counter = 1;
+plot(empinfo$age, type="l", xlab="empid", ylab="age", col="blue")
+pie(table1)
+legend("topright",legend=rownames(table3))
+boxplot(empinfo$age~empinfo$status,col=c("blue","red"))
 
-    async function getArea(lat, lon) {
-      try {
-        let res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
-        let data = await res.json();
-        if (data && data.address) {
-          return data.address.city || data.address.town || data.address.county || data.address.state_district || "Unknown Area";
-        }
-      } catch {
-        return "Unknown Area";
-      }
-      return "Unknown Area";
-    }
+Corrolation
+data=cars
+summary(data)
+corr=corr(data$speed,data$dist)
+corr.test(data$speed,data$dist,methord="spearmann")
+corr.test(data$speed,data$dist,methord="Kendal")
 
-    function getNetworkType() {
-      let connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-      if (connection && connection.effectiveType) {
-        if (connection.effectiveType.includes("5g")) return "5G";
-        if (connection.effectiveType.includes("4g")) return "4G";
-        if (connection.effectiveType.includes("3g")) return "3G";
-        if (connection.effectiveType.includes("2g")) return "2G";
-        return connection.effectiveType.toUpperCase();
-      }
-      return navigator.onLine ? "WiFi/Data" : "Offline";
-    }
+Linear regression model
+data=cars
+plot(data$speed,data$dist)
+regression1=lm(data$speed~data$dist)
+regression1
+abline(regression1)
+summary(regression1)
 
-    function getDeviceName() {
-      let ua = navigator.userAgent;
-      if (/android/i.test(ua)) return "Android Phone";
-      if (/iPhone|iPad|iPod/i.test(ua)) return "iOS Device";
-      if (/windows/i.test(ua)) return "Windows PC";
-      if (/mac/i.test(ua)) return "Mac";
-      return "Unknown Device";
-    }
+regression2=lm(data$dist~data$speed)
+regression2
+abline(regression2)
+summary(regression2)
+Y=c(110,80,70,120,150,90,70,120)
+Y
+x1=c(30,40,20,50,60,40,20,60)
+x1
+x2=c(11,10,7,15,19,12,8,14)
+x2
+RegModel=lm(Y~x1+x2)
+RegModel
+summary(RegModel)
+install.packages("sactterplot3d")
+library(scatterplot3d)
+scatterplot3d(Y,x1,x2)
+graph=scatterplot3d(Y,x1,x2)
+graph$plane3d(RegModel)
 
-    async function measurePing() {
-      let start = performance.now();
-      await fetch("https://www.google.com", {mode: 'no-cors'}).catch(()=>{});
-      return Math.round(performance.now() - start);
-    }
+Model2
+data=mtcars
+RegModel=lm(data$disp~data$mpg+data$hp)
+RegModel
+summary(RegModel)
+install.packages("sactterplot3d")
+library(scatterplot3d)
+scatterplot3d(data$disp,data$mpg,data$hp)
+graph=scatterplot3d(data$disp,data$mpg,data$hp)
+graph$plane3d(RegModel)
 
-    async function measureLatency() {
-      let start = performance.now();
-      await fetch("https://speed.hetzner.de/100MB.bin", {method:"HEAD"}).catch(()=>{});
-      return Math.round(performance.now() - start);
-    }
+Poisson’s distribution
+n=20
+n
+ps=0.02
+lambda=n*ps
+lambda
+pl=sum(dpois(2:n,lambda))
+pl
+round(pl*1000)
+p2=dpois(2,lambda)
+p2
+round(1000*p2)
+p3=ppois(2,lambda)
+p3
+round(p3*1000)
+x1=0:n
+px1=dpois(x1,lambda)
+plot(x1,px1,type="h",xlab="values of x ",ylab="values of probability",main="probability distribution")
+Ex1=weighted.mean(x1,px1)
+varx1=weighted.mean(x1*x1,px1)-(weighted.mean(x1,px1))^2
+varx1
 
-    async function measureSpeed() {
-      let start = performance.now();
-      let size = 500000; // ~500 KB
-      await fetch("https://speed.hetzner.de/1MB.bin?cache=" + Math.random())
-        .then(r => r.blob()).catch(()=>{});
-      let duration = (performance.now() - start) / 1000;
-      let speedMbps = ((size * 8) / (duration * 1024 * 1024)).toFixed(2);
-      return speedMbps;
-    }
+Normal distributions
+x=seq(0,40)
+x
+y=dnorm(x,mean=20,sd=5)
+y
+plot(x,y,type='l')
+p1=pnorm(15,mean=20,sd=5)
+p1
+#p(x<=15)
+x2=seq(0,15)
+x2
+y2=dnorm(x2,mean=20,sd=5)
+y2
+polygon(c(0,x2,15),c(0,y2,0),col='yellow')
+p2=pnorm(40,mean=20,sd=5)-pnorm(25,mean=20,sd=5)
+p2
 
-    // ✅ Real-time listener to Firestore
-    function loadData() {
-      let table = document.getElementById("dataTable");
+x3=seq(15,25)
+x3
+y3=dnorm(x3,mean=20,sd=5)
+y3
+polygon(c(15,x3,25),c(0,y3,0),col='green')
 
-      onSnapshot(collection(db, "network_data"), (snapshot) => {
-        // Clear table except header
-        while (table.rows.length > 1) table.deleteRow(1);
+x4=seq(25,40)
+x3
+y4=dnorm(x4,mean=20,sd=5)
+y3
+polygon(c(25,x4,40),c(0,y4,0),col='red')
 
-        snapshot.forEach((docSnap) => {
-          let data = docSnap.data();
-          let row = table.insertRow();
-          row.setAttribute("data-id", docSnap.id); // Store Firestore ID
-          row.insertCell(0).innerText = data.sl_no;
-          row.insertCell(1).innerText = data.latitude;
-          row.insertCell(2).innerText = data.longitude;
-          row.insertCell(3).innerText = data.time;
-          row.insertCell(4).innerText = data.area;
-          row.insertCell(5).innerText = data.network;
-          row.insertCell(6).innerText = data.device;
-          row.insertCell(7).innerText = data.ping;
-          row.insertCell(8).innerText = data.latency;
-          row.insertCell(9).innerText = data.speed;
+data.frame(x2,x4)
 
-          counter = Math.max(counter, data.sl_no + 1);
-        });
-      });
-    }
+xbar=14.6
+n=35
+u=14.6
+a=0.05
+za=1.96
+sigma=2.5
+zc=(xbar-u)/(sigma/sqrt(n))
+zc
+zhalfalpha=qnorm(1-(a/2))
+zhalfalpha
+c(-zhalfalpha,zhalfalpha)
+pval=2*pnorm(za)
+if(pval>a){print("Accept null hypothesis")}
 
-    document.getElementById("collectBtn").onclick = async () => {
-      if (!navigator.geolocation) {
-        alert("Geolocation not supported");
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        let lat = pos.coords.latitude;
-        let lon = pos.coords.longitude;
-        let time = new Date().toLocaleString();
-        let area = await getArea(lat, lon);
-        let network = getNetworkType();
-        let device = getDeviceName();
-        let ping = await measurePing();
-        let latency = await measureLatency();
-        let speed = await measureSpeed();
-
-        try {
-          await addDoc(collection(db, "network_data"), {
-            sl_no: counter,
-            latitude: lat.toFixed(6),
-            longitude: lon.toFixed(6),
-            time: time,
-            area: area,
-            network: network,
-            device: device,
-            ping: ping,
-            latency: latency,
-            speed: speed
-          });
-          counter++;
-        } catch (err) {
-          console.error("Error saving data:", err);
-        }
-      }, () => {
-        alert("Location access denied. Please enable location.");
-      });
-    };
-
-    document.getElementById("downloadBtn").onclick = () => {
-      let table = document.getElementById("dataTable");
-      let rows = [];
-      for (let i=0; i<table.rows.length; i++) {
-        let cols = table.rows[i].cells;
-        let row = [];
-        for (let j=0; j<cols.length; j++) row.push(cols[j].innerText);
-        rows.push(row.join(","));
-      }
-      let csv = rows.join("\n");
-      let blob = new Blob([csv], { type: "text/csv" });
-      let url = window.URL.createObjectURL(blob);
-      let a = document.createElement("a");
-      a.setAttribute("hidden", "");
-      a.href = url;
-      a.download = "network_data.csv";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    };
-
-    document.getElementById("deleteBtn").onclick = async () => {
-      let table = document.getElementById("dataTable");
-      if (table.rows.length > 1) {
-        let lastRow = table.rows[table.rows.length - 1];
-        let docId = lastRow.getAttribute("data-id");
-        if (docId) {
-          await deleteDoc(doc(db, "network_data", docId));
-        }
-      }
-    };
-
-    // ✅ Load Firestore data when page loads
-    window.onload = loadData;
-  </script>
+p1=0.20
+p2=0.185
+n1=900
+n2=1600
+P=((n1*p1)+(n2*p2))/(n1+n2) 
+Q=1-P
+z=(p1-p2)/sqrt(P*Q*(1/n1)+(1/n2))
+alpha=0.05
+zalpha=qnorm(1-(alpha/2))
+if(z<=zalpha){print("Accept null hypothesys")}
+else{print("Reject null hypothesys")}
+</pre>
 </body>
 </html>
