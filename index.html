@@ -18,12 +18,12 @@ status = c(1, 1, 2, 2, 1)
 empinfo = data.frame(empid, age, gender, status)
 
 empinfo$gender = factor(empinfo$gender,
-                         levels = c(0, 1),
-                         labels = c("female", "male"))
+                             levels = c(0, 1),
+                             labels = c("female", "male"))
 
 empinfo$status = factor(empinfo$status,
-                         levels = c(1, 2),
-                         labels = c("faculty", "student"))
+                             levels = c(1, 2),
+                             labels = c("faculty", "student"))
 
 male=subset(empinfo,empinfo$gender=="male")
 summary(empinfo)
@@ -151,13 +151,110 @@ p1=0.20
 p2=0.185
 n1=900
 n2=1600
-P=((n1*p1)+(n2*p2))/(n1+n2) 
+P=((n1*p1)+(n2*p2))/(n1+n2)
 Q=1-P
 z=(p1-p2)/sqrt(P*Q*(1/n1)+(1/n2))
 alpha=0.05
 zalpha=qnorm(1-(alpha/2))
 if(z<=zalpha){print("Accept null hypothesys")}
 else{print("Reject null hypothesys")}
+
+# Single Sample t-Test
+n <- 12
+xbar <- 68
+mu0 <- 65
+sd <- 8
+alpha <- 0.05
+
+# Calculate t-statistic
+t_calc <- (xbar - mu0) / (sd / sqrt(n))
+
+# Tabular t value (two-tailed)
+t_tab <- qt(1 - alpha/2, df = n-1)
+
+# Print results
+cat("Calculated t:", t_calc, "\n")
+cat("Tabular t:", t_tab, "\n")
+
+if(abs(t_calc) > t_tab){
+  cat("Reject H0: Mean is significantly different\n")
+} else {
+  cat("Accept H0: Mean is NOT significantly different\n")
+}
+
+# F test (Two Sample Variance Test)
+var1 <- 25
+var2 <- 16
+n1 <- 10
+n2 <- 12
+alpha <- 0.05
+
+F_calc <- var1 / var2
+
+# Tabular values for two-tailed F test
+F_upper <- qf(1 - alpha/2, df1 = n1-1, df2 = n2-1)
+F_lower <- qf(alpha/2, df1 = n1-1, df2 = n2-1)
+
+cat("Calculated F:", F_calc, "\n")
+cat("Lower F:", F_lower, " Upper F:", F_upper, "\n")
+
+if(F_calc < F_lower | F_calc > F_upper){
+  cat("Reject H0: Variances are NOT equal\n")
+} else {
+  cat("Accept H0: Variances are equal\n")
+}
+
+# Chi Squared Test (for Variance)
+#for binomial
+n <- 15
+s2 <- 6
+sigma2 <- 4
+alpha <- 0.05
+
+chi_calc <- (n-1)*s2/sigma2
+
+chi_upper <- qchisq(1 - alpha/2, df = n-1)
+chi_lower <- qchisq(alpha/2, df = n-1)
+
+cat("Calculated Chi-square:", chi_calc, "\n")
+cat("Lower:", chi_lower, " Upper:", chi_upper, "\n")
+
+if(chi_calc < chi_lower | chi_calc > chi_upper){
+  cat("Reject H0: Variance is significantly different\n")
+} else {
+  cat("Accept H0: No significant difference in variance\n")
+}
+
+# ANOVA (One-way Analysis of Variance)
+# Plant growth data (Five Fertilizers)
+A <- c(22, 25, 20, 23, 21)
+B <- c(28, 26, 29, 27, 30)
+C <- c(18, 20, 19, 21, 17)
+D <- c(25, 27, 26, 28, 24)
+E <- c(30, 32, 29, 31, 33)
+
+# Create dataframe
+df <- data.frame(A, B, C, D, E)
+df
+
+# Convert to stacked form (long format for ANOVA)
+stgr <- stack(df)
+stgr
+
+# Check structure
+str(stgr)
+
+# One-way ANOVA model: values explained by independent variable (ind)
+anova_result <- aov(values ~ ind, data = stgr)
+
+# Summary of ANOVA results
+summary(anova_result)
+
+# Boxplot of growth vs. fertilizer type
+boxplot(values ~ ind, data = stgr,
+        main="Plant Growth vs Fertilizer Type",
+        xlab="Fertilizer",
+        ylab="Plant Growth (cm)")
 </pre>
 </body>
 </html>
