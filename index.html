@@ -1,260 +1,310 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>R Codes</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verilog HDL Programs Collection</title>
+<style>
+    body {
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background-color: #121212;
+        color: #e0e0e0;
+        line-height: 1.5;
+        margin: 40px;
+    }
+    h2 {
+        color: #00e676;
+        border-bottom: 2px solid #00e676;
+        padding-bottom: 5px;
+    }
+    pre {
+        background-color: #1e1e1e;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        color: #dcdcdc;
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 14px;
+    }
+    code {
+        color: #ffcc80;
+    }
+</style>
 </head>
 <body>
-<pre>
-#generating datapoints
-1:10
-c('1','q','2','1','1')
 
-Data handling
-empid = c(1, 2, 3, 4, 5)
-age = c(30, 25, 45, 32, 20)
-gender = c(0, 1, 1, 0, 1)
-status = c(1, 1, 2, 2, 1)
+<h1>Verilog HDL Programs Collection</h1>
 
-empinfo = data.frame(empid, age, gender, status)
+<h2>Encoder</h2>
+<pre><code>
+module prog_1(
+    input [7:0] d,
+    output reg [2:0] y
+);
+    always @(*) begin
+        case(d)
+            8'b00000001: y = 3'b000;
+            8'b00000010: y = 3'b001;
+            8'b00000100: y = 3'b010;
+            8'b00001000: y = 3'b011;
+            8'b00010000: y = 3'b100;
+            8'b00100000: y = 3'b101;
+            8'b01000000: y = 3'b110;
+            8'b10000000: y = 3'b111;
+        endcase
+    end
+endmodule
 
-empinfo$gender = factor(empinfo$gender,
-                             levels = c(0, 1),
-                             labels = c("female", "male"))
+module prog_1_tb;
+    reg [7:0] d;
+    wire [2:0] y;
+    prog_1 uut(d, y);
+    initial begin
+        d = 8'b00000001; #10;
+        d = 8'b00000010; #10;
+        d = 8'b00000100; #10;
+        d = 8'b00001000; #10;
+        d = 8'b00010000; #10;
+        d = 8'b00100000; #10;
+        d = 8'b01000000; #10;
+        d = 8'b10000000; #10;
+    end
+endmodule
+</code></pre>
 
-empinfo$status = factor(empinfo$status,
-                             levels = c(1, 2),
-                             labels = c("faculty", "student"))
+<h2>Half Adder & Full Adder</h2>
+<pre><code>
+module half_adder(a,b,s,c);
+    input a,b;
+    output s,c;
+    assign s = a ^ b;
+    assign c = a & b;
+endmodule
 
-male=subset(empinfo,empinfo$gender=="male")
-summary(empinfo)
-table1=table(empinfo$gender)
-table1
+module prog_1(A,B,Cin,sum,Cout);
+    input A,B,Cin;
+    output sum,Cout;
+    wire sum_1,c1;
+    half_adder HA1(.a(A),.b(B),.s(sum_1),.c(c1));
+    half_adder HA2(.a(sum_1),.b(Cin),.s(sum),.c(Cout));
+endmodule
 
-plot(empinfo$age, type="l", xlab="empid", ylab="age", col="blue")
-pie(table1)
-legend("topright",legend=rownames(table3))
-boxplot(empinfo$age~empinfo$status,col=c("blue","red"))
+module prog_1_tb;
+    reg A,B,Cin;
+    wire sum,Cout;
+    prog_1 uut(A,B,Cin,sum,Cout);
+    initial begin
+        A=0;B=0;Cin=0;#10;
+        A=0;B=0;Cin=1;#10;
+        A=0;B=1;Cin=0;#10;
+        A=0;B=1;Cin=1;#10;
+        A=1;B=0;Cin=0;#10;
+        A=1;B=0;Cin=1;#10;
+        A=1;B=1;Cin=0;#10;
+        A=1;B=1;Cin=1;#10;
+    end
+endmodule
+</code></pre>
 
-Corrolation
-data=cars
-summary(data)
-corr=corr(data$speed,data$dist)
-corr.test(data$speed,data$dist,methord="spearmann")
-corr.test(data$speed,data$dist,methord="Kendal")
+<h2>Demultiplexer (1x8 DEMUX)</h2>
+<pre><code>
+module prog_1(
+    input d, 
+    input [2:0] sel,
+    output [7:0] y
+);
+    assign y[0]=d&(~sel[0])&(~sel[1])&(~sel[2]);
+    assign y[1]=d&(~sel[0])&(~sel[1])&(sel[2]);
+    assign y[2]=d&(~sel[0])&(sel[1])&(~sel[2]);
+    assign y[3]=d&(~sel[0])&(sel[1])&(sel[2]);
+    assign y[4]=d&(sel[0])&(~sel[1])&(~sel[2]);
+    assign y[5]=d&(sel[0])&(~sel[1])&(sel[2]);
+    assign y[6]=d&(sel[0])&(sel[1])&(~sel[2]);
+    assign y[7]=d&(sel[0])&(sel[1])&(sel[2]);
+endmodule
 
-Linear regression model
-data=cars
-plot(data$speed,data$dist)
-regression1=lm(data$speed~data$dist)
-regression1
-abline(regression1)
-summary(regression1)
+module prog_1_tb;
+    reg d;
+    reg [2:0] sel;
+    wire [7:0] y;
+    prog_1 uut(d,sel,y);
+    initial begin
+        d=1; sel=3'b000; #10;
+        d=1; sel=3'b001; #10;
+        d=1; sel=3'b010; #10;
+        d=1; sel=3'b011; #10;
+        d=1; sel=3'b100; #10;
+        d=1; sel=3'b101; #10;
+        d=1; sel=3'b110; #10;
+        d=1; sel=3'b111; #10;
+    end
+endmodule
+</code></pre>
 
-regression2=lm(data$dist~data$speed)
-regression2
-abline(regression2)
-summary(regression2)
-Y=c(110,80,70,120,150,90,70,120)
-Y
-x1=c(30,40,20,50,60,40,20,60)
-x1
-x2=c(11,10,7,15,19,12,8,14)
-x2
-RegModel=lm(Y~x1+x2)
-RegModel
-summary(RegModel)
-install.packages("sactterplot3d")
-library(scatterplot3d)
-scatterplot3d(Y,x1,x2)
-graph=scatterplot3d(Y,x1,x2)
-graph$plane3d(RegModel)
+<h2>4-bit Parallel Adder</h2>
+<pre><code>
+module full_adder(a,b,cin,s,cout);
+    input a,b,cin;
+    output s,cout;
+    assign s=a^b^cin;
+    assign cout=(a&b)|(b&cin)|(a&cin);
+endmodule
 
-Model2
-data=mtcars
-RegModel=lm(data$disp~data$mpg+data$hp)
-RegModel
-summary(RegModel)
-install.packages("sactterplot3d")
-library(scatterplot3d)
-scatterplot3d(data$disp,data$mpg,data$hp)
-graph=scatterplot3d(data$disp,data$mpg,data$hp)
-graph$plane3d(RegModel)
+module prog_1(input [3:0]A, input [3:0]B, input C, output [3:0]sum, output cout);
+    wire c1,c2,c3;
+    full_adder FA1(A[0],B[0],C,sum[0],c1);
+    full_adder FA2(A[1],B[1],c1,sum[1],c2);
+    full_adder FA3(A[2],B[2],c2,sum[2],c3);
+    full_adder FA4(A[3],B[3],c3,sum[3],cout);
+endmodule
+</code></pre>
 
-Poisson’s distribution
-n=20
-n
-ps=0.02
-lambda=n*ps
-lambda
-pl=sum(dpois(2:n,lambda))
-pl
-round(pl*1000)
-p2=dpois(2,lambda)
-p2
-round(1000*p2)
-p3=ppois(2,lambda)
-p3
-round(p3*1000)
-x1=0:n
-px1=dpois(x1,lambda)
-plot(x1,px1,type="h",xlab="values of x ",ylab="values of probability",main="probability distribution")
-Ex1=weighted.mean(x1,px1)
-varx1=weighted.mean(x1*x1,px1)-(weighted.mean(x1,px1))^2
-varx1
+<h2>2x2 Multiplier</h2>
+<pre><code>
+module multiplier_2x2 (input [1:0] A, B, output [3:0] P);
+    wire P0, P1, P2, P3;
+    wire C1, C2, C3;
 
-Normal distributions
-x=seq(0,40)
-x
-y=dnorm(x,mean=20,sd=5)
-y
-plot(x,y,type='l')
-p1=pnorm(15,mean=20,sd=5)
-p1
-#p(x<=15)
-x2=seq(0,15)
-x2
-y2=dnorm(x2,mean=20,sd=5)
-y2
-polygon(c(0,x2,15),c(0,y2,0),col='yellow')
-p2=pnorm(40,mean=20,sd=5)-pnorm(25,mean=20,sd=5)
-p2
+    and (P0, A[0], B[0]);
+    and (C1, A[1], B[0]);
+    and (C2, A[0], B[1]);
+    and (C3, A[1], B[1]);
+    xor (P1, C1, C2);
+    and (P2, C1, C2);
+    xor (P3, C3, P2);
 
-x3=seq(15,25)
-x3
-y3=dnorm(x3,mean=20,sd=5)
-y3
-polygon(c(15,x3,25),c(0,y3,0),col='green')
+    assign P = {P3, P2, P1, P0};
+endmodule
 
-x4=seq(25,40)
-x3
-y4=dnorm(x4,mean=20,sd=5)
-y3
-polygon(c(25,x4,40),c(0,y4,0),col='red')
+module tb_multiplier_2x2();
+    reg [1:0] A,B;
+    wire [3:0] P;
+    multiplier_2x2 uut (.A(A), .B(B), .P(P));
+    initial begin
+        A=2'b00;B=2'b00;#10;
+        A=2'b01;B=2'b10;#10;
+        A=2'b11;B=2'b10;#10;
+        A=2'b10;B=2'b11;#10;
+        $finish;
+    end
+endmodule
+</code></pre>
 
-data.frame(x2,x4)
+<h2>JK Flip-Flop</h2>
+<pre><code>
+module jkff(
+    output reg Q,
+    output reg QB,
+    input J,
+    input K,
+    input CLK
+);
+    always @(posedge CLK)
+    begin
+        case ({J, K})
+            2'b00: Q <= Q;
+            2'b01: Q <= 1'b0;
+            2'b10: Q <= 1'b1;
+            2'b11: Q <= ~Q;
+        endcase
+        QB <= ~Q;
+    end
+endmodule
 
-xbar=14.6
-n=35
-u=14.6
-a=0.05
-za=1.96
-sigma=2.5
-zc=(xbar-u)/(sigma/sqrt(n))
-zc
-zhalfalpha=qnorm(1-(a/2))
-zhalfalpha
-c(-zhalfalpha,zhalfalpha)
-pval=2*pnorm(abs(zc))
-if(pval>a){print("Accept null hypothesis")}
+`timescale 1ns/1ps
+module jkff_TB;
+    reg J,K,CLK;
+    wire Q,QB;
+    jkff uut(.Q(Q),.QB(QB),.J(J),.K(K),.CLK(CLK));
+    initial CLK=0;
+    always #10 CLK=~CLK;
+    initial begin
+        J=0;K=0;#20;
+        J=0;K=1;#20;
+        J=1;K=0;#20;
+        J=1;K=1;#20;
+        J=0;K=0;#20;
+        J=1;K=1;#20;
+        $stop;
+    end
+endmodule
+</code></pre>
 
-p1=0.20
-p2=0.185
-n1=900
-n2=1600
-P=((n1*p1)+(n2*p2))/(n1+n2)
-Q=1-P
-z=(p1-p2)/sqrt(P*Q*(1/n1)+(1/n2))
-alpha=0.05
-zalpha=qnorm(1-(alpha/2))
-if(z<=zalpha){print("Accept null hypothesys")}
-else{print("Reject null hypothesys")}
+<h2>T Flip-Flop</h2>
+<pre><code>
+module t_ff(Q, QB, T, CLK);
+    input T, CLK;
+    output Q, QB;
+    reg Q, QB;
+    always @(posedge CLK)
+    begin
+        if (T)
+            Q = ~Q;
+        QB = ~Q;
+    end
+endmodule
 
-# Single Sample t-Test
-n <- 12
-xbar <- 68
-mu0 <- 65
-sd <- 8
-alpha <- 0.05
+module t_ff_TB;
+    reg T, CLK;
+    wire Q, QB;
+    t_ff uut(.Q(Q), .QB(QB), .T(T), .CLK(CLK));
+    always #100 CLK = ~CLK;
+    initial begin
+        CLK=0;
+        T=0;
+        #200 T=1;
+        #200 T=0;
+        #200 T=1;
+        #200 T=0;
+        #200 $stop;
+    end
+endmodule
+</code></pre>
 
-# Calculate t-statistic
-t_calc <- (xbar - mu0) / (sd / sqrt(n))
+<h2>Shift Register (PISO)</h2>
+<pre><code>
+module piso(CLK, D, Q, SHIFT_LOAD);
+    input CLK, SHIFT_LOAD;
+    input [3:0] D;
+    output Q;
+    reg Q;
+    reg [3:0] TEMP;
 
-# Tabular t value (two-tailed)
-t_tab <- qt(1 - alpha/2, df = n-1)
+    always @(posedge CLK)
+    begin
+        if (SHIFT_LOAD == 1'b0)
+        begin
+            Q <= 1'b0;
+            TEMP <= D;
+        end
+        else
+        begin
+            Q <= TEMP[0];
+            TEMP <= TEMP >> 1;
+        end
+    end
+endmodule
 
-# Print results
-cat("Calculated t:", t_calc, "\n")
-cat("Tabular t:", t_tab, "\n")
+module piso_tb;
+    reg CLK, SHIFT_LOAD;
+    reg [3:0] D;
+    wire Q;
 
-if(abs(t_calc) > t_tab){
-  cat("Reject H0: Mean is significantly different\n")
-} else {
-  cat("Accept H0: Mean is NOT significantly different\n")
-}
+    piso uut(.CLK(CLK), .D(D), .Q(Q), .SHIFT_LOAD(SHIFT_LOAD));
 
-# F test (Two Sample Variance Test)
-var1 <- 25
-var2 <- 16
-n1 <- 10
-n2 <- 12
-alpha <- 0.05
+    initial CLK = 1'b1;
+    always #100 CLK = ~CLK;
 
-F_calc <- var1 / var2
+    initial begin
+        D = 4'b1101;
+        SHIFT_LOAD = 1'b0; #200;
+        SHIFT_LOAD = 1'b1; #1200; D = 4'b1001;
+        SHIFT_LOAD = 1'b0; #200;
+        SHIFT_LOAD = 1'b1; #1000;
+        $stop;
+    end
+endmodule
+</code></pre>
 
-# Tabular values for two-tailed F test
-F_upper <- qf(1 - alpha/2, df1 = n1-1, df2 = n2-1)
-F_lower <- qf(alpha/2, df1 = n1-1, df2 = n2-1)
-
-cat("Calculated F:", F_calc, "\n")
-cat("Lower F:", F_lower, " Upper F:", F_upper, "\n")
-
-if(F_calc < F_lower | F_calc > F_upper){
-  cat("Reject H0: Variances are NOT equal\n")
-} else {
-  cat("Accept H0: Variances are equal\n")
-}
-
-# Chi Squared Test (for Variance)
-#for binomial
-n <- 15
-s2 <- 6
-sigma2 <- 4
-alpha <- 0.05
-
-chi_calc <- (n-1)*s2/sigma2
-
-chi_upper <- qchisq(1 - alpha/2, df = n-1)
-chi_lower <- qchisq(alpha/2, df = n-1)
-
-cat("Calculated Chi-square:", chi_calc, "\n")
-cat("Lower:", chi_lower, " Upper:", chi_upper, "\n")
-
-if(chi_calc < chi_lower | chi_calc > chi_upper){
-  cat("Reject H0: Variance is significantly different\n")
-} else {
-  cat("Accept H0: No significant difference in variance\n")
-}
-
-# ANOVA (One-way Analysis of Variance)
-# Plant growth data (Five Fertilizers)
-A <- c(22, 25, 20, 23, 21)
-B <- c(28, 26, 29, 27, 30)
-C <- c(18, 20, 19, 21, 17)
-D <- c(25, 27, 26, 28, 24)
-E <- c(30, 32, 29, 31, 33)
-
-# Create dataframe
-df <- data.frame(A, B, C, D, E)
-df
-
-# Convert to stacked form (long format for ANOVA)
-stgr <- stack(df)
-stgr
-
-# Check structure
-str(stgr)
-
-# One-way ANOVA model: values explained by independent variable (ind)
-anova_result <- aov(values ~ ind, data = stgr)
-
-# Summary of ANOVA results
-summary(anova_result)
-
-# Boxplot of growth vs. fertilizer type
-boxplot(values ~ ind, data = stgr,
-        main="Plant Growth vs Fertilizer Type",
-        xlab="Fertilizer",
-        ylab="Plant Growth (cm)")
-</pre>
 </body>
 </html>
