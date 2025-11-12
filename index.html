@@ -1,392 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fun page</title>
-<style>
-  body {
-    font-family: Consolas, "Courier New", monospace;
-    background-color: white;
-    color: black;
-    margin: 40px;
-    line-height: 1.4;
-  }
-  h2 {
-    border-bottom: 1px solid #000;
-    padding-bottom: 4px;
-  }
-  pre {
-    background: #f8f8f8;
-    padding: 10px;
-    border: 1px solid #ccc;
-    overflow-x: auto;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Display</title>
+    <style>
+        /* Optional: Basic styling for better presentation */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px; /* Space between images */
+            padding: 20px;
+        }
+        img {
+            max-width: 100%; /* Ensure images don't exceed their container */
+            height: auto;
+            border: 1px solid #ccc;
+            padding: 5px;
+        }
+    </style>
 </head>
 <body>
 
-<h1>Verilog HDL Programs</h1>
+    <h1>Images 1.png through 19.png</h1>
 
-<h2>Encoder</h2>
-<pre>
-module prog_1(
-    input[7:0]d,
-    output reg [2:0]y);
-    always@(*) begin
-        case(d)
-            8'b00000001:y=3'b000;
-            8'b00000010:y=3'b001;
-            8'b00000100:y=3'b010;
-            8'b00001000:y=3'b011;
-            8'b00010000:y=3'b100;
-            8'b00100000:y=3'b101;
-            8'b01000000:y=3'b110;
-            8'b10000000:y=3'b111;
-        endcase
-    end
-endmodule
+    <div class="image-container">
+        </div>
 
-module prog_1_tb;
-    reg [7:0]d;
-    wire [2:0]y;
-    prog_1 uut(d,y);
-    initial begin
-        d = 8'b00000001; #10;
-        d = 8'b00000010; #10;
-        d = 8'b00000100; #10;
-        d = 8'b00001000; #10;
-        d = 8'b00010000; #10;
-        d = 8'b00100000; #10;
-        d = 8'b01000000; #10;
-        d = 8'b10000000; #10;
-    end
-endmodule
-</pre>
+    <script>
+        const container = document.querySelector('.image-container');
+        const totalImages = 19;
 
-<h2>Half Adder & Full Adder</h2>
-<pre>
-module half_adder(a,b,s,c);
-    input a,b;
-    output s,c;
-    assign s=a^b;
-    assign c=(a&b);
-endmodule
+        // Loop to create <img> tags for 1.png up to 19.png
+        for (let i = 1; i <= totalImages; i++) {
+            const fileName = `${i}.png`; // Creates '1.png', '2.png', etc.
 
-module prog_1(A,B,Cin,sum,Cout);
-    input A,B,Cin;
-    output sum,Cout;
-    wire sum_1,c1;
-    half_adder HA1(.a(A),.b(B),.s(sum_1),.c(c1));
-    half_adder HA2(.a(sum_1),.b(Cin),.s(sum),.c(Cout));
-endmodule
+            // Create the image element
+            const img = document.createElement('img');
+            img.src = fileName;
+            img.alt = `Image ${i}`; // Alt text for accessibility
 
-module prog_1_tb;
-    reg A,B,Cin;
-    wire sum,Cout;
-    prog_1 uut(A,B,Cin,sum,Cout);
-    initial begin
-        A = 0; B = 0; Cin = 0; #10;
-        A = 0; B = 0; Cin = 1; #10;
-        A = 0; B = 1; Cin = 0; #10;
-        A = 0; B = 1; Cin = 1; #10;
-        A = 1; B = 0; Cin = 0; #10;
-        A = 1; B = 0; Cin = 1; #10;
-        A = 1; B = 1; Cin = 0; #10;
-        A = 1; B = 1; Cin = 1; #10;
-    end
-endmodule
-</pre>
-
-<h2>Demultiplexer (1x8 DEMUX)</h2>
-<pre>
-module prog_1(
-    input d, 
-    input [2:0]sel,
-    output [7:0]y);
-    assign y[0]=d&(~sel[0])&(~sel[1])&(~sel[2]);
-    assign y[1]=d&(~sel[0])&(~sel[1])&(sel[2]);
-    assign y[2]=d&(~sel[0])&(sel[1])&(~sel[2]);
-    assign y[3]=d&(~sel[0])&(sel[1])&(sel[2]);
-    assign y[4]=d&(sel[0])&(~sel[1])&(~sel[2]);
-    assign y[5]=d&(sel[0])&(~sel[1])&(sel[2]);
-    assign y[6]=d&(sel[0])&(sel[1])&(~sel[2]);
-    assign y[7]=d&(sel[0])&(sel[1])&(sel[2]);
-endmodule
-
-module prog_1_tb;
-    reg d;
-    reg [2:0]sel;
-    wire [7:0]y;
-    prog_1 uut(d,sel,y);
-    initial begin
-        d = 1; sel = 3'b000; #10;
-        d = 1; sel = 3'b001; #10;
-        d = 1; sel = 3'b010; #10;
-        d = 1; sel = 3'b011; #10;
-        d = 1; sel = 3'b100; #10;
-        d = 1; sel = 3'b101; #10;
-        d = 1; sel = 3'b110; #10;
-        d = 1; sel = 3'b111; #10;
-    end
-endmodule
-</pre>
-
-<h2>4-bit Parallel Adder</h2>
-<pre>
-module full_adder(a,b,cin,s,cout);
-    input a,b,cin;
-    output s,cout;
-    assign s=a^b^cin;
-    assign cout=(a&b)|(b&cin)|(a&cin);
-endmodule
-
-module prog_1(input [3:0]A, input [3:0]B, input C, output [3:0]sum, output cout);
-    wire c1,c2,c3;
-    full_adder FA1(A[0],B[0],C,sum[0],c1);
-    full_adder FA2(A[1],B[1],c1,sum[1],c2);
-    full_adder FA3(A[2],B[2],c2,sum[2],c3);
-    full_adder FA4(A[3],B[3],c3,sum[3],cout);
-endmodule
-
-module prog_1_tb;
-    reg [3:0]A;
-    reg [3:0]B;
-    reg C;
-    wire [3:0]sum;
-    wire cout;
-    prog_1 uut (.A(A), .B(B), .C(C), .sum(sum), .cout(cout));
-    initial begin
-        A = 4'b0000; B = 4'b0000; C = 0; #10;
-        A = 4'b0011; B = 4'b0101; C = 0; #10;
-        A = 4'b1111; B = 4'b0001; C = 0; #10;
-        A = 4'b1010; B = 4'b0101; C = 1; #10;
-        A = 4'b1111; B = 4'b1111; C = 1; #10;
-    end
-endmodule
-</pre>
-
-<h2>2x2 Multiplier</h2>
-<pre>
-module multiplier_2x2 (input [1:0] A, B, output [3:0] P);
-
-wire P0, P1, P2, P3;
-wire C1, C2, C3;
-
-and (P0, A[0], B[0]);
-and (C1, A[1], B[0]);
-and (C2, A[0], B[1]);
-and (C3, A[1], B[1]);
-xor (P1, C1, C2);
-and (P2, C1, C2);
-xor (P3, C3, P2);
-
-assign P = {P3, P2, P1, P0};
-endmodule
-
-module tb_multiplier_2x2 ();
-reg [1:0] A, B;
-wire [3:0] P;
-multiplier_2x2 uut (.A(A), .B(B), .P(P));
-initial begin
-    A = 2'b00; B = 2'b00; #10;
-    A = 2'b01; B = 2'b10; #10;
-    A = 2'b11; B = 2'b10; #10;
-    A = 2'b10; B = 2'b11; #10;
-    $finish;
-end
-endmodule
-</pre>
-
-<h2>SR Flip-Flop</h2>
-<pre>
-module SR_FF(Q,QB,S,R,CLK);
-input S,R,CLK;
-output Q,QB;
-reg Q,QB;
-always @(posedge CLK)
-begin
-case({S,R})
-2'b00:Q=Q;
-2'b01:Q=0;
-2'b10:Q=1;
-2'b11:Q=1'bx;
-endcase
-QB=~Q;;
-end
-endmodule
-module SR_FF_TB;
-reg S,R;
-reg CLK;
-wire Q;
-wire QB;
-SR_FF uut (
-.Q(Q),
-.QB(QB),
-.S(S),
-.R(R),
-.CLK(CLK)
-);
-always #100 CLK=~CLK;
-initial
-CLK=1;
-#200 S=1; R=0;
-#200 S=0; R=0;
-#200 S=0; R=1;
-#200 S=1; R=1;
-end
-endmodule
-</pre>
-
-<h2>D Flip-Flop</h2>
-<pre>
-module D_FF(Q,QB,D,CLK);
-input D,CLK;
-output Q,QB;
-reg Q,QB;
-always @(posedge CLK)
-begin
-Q=D;
-QB=~Q;
-end
-endmodule
-module D_FF_TB;
-reg D;
-reg CLK;
-wire Q;
-wire QB;
-D_FF uut (
-.Q(Q),
-.QB(QB),
-.D(D),
-.CLK(CLK)
-);
-always #100 CLK=~CLK;
-initial
-// Initialize Inputs
-CLK=1;
-#200 D=1;
-#200 D=0;
-end
-endmodule
-</pre>
-
-<h2>JK Flip-Flop</h2>
-<pre>
-module jkff(
-    output reg Q,
-    output reg QB,
-    input J,
-    input K,
-    input CLK
-);
-    always @(posedge CLK)
-    begin
-        case ({J, K})
-            2'b00: Q <= Q;
-            2'b01: Q <= 1'b0;
-            2'b10: Q <= 1'b1;
-            2'b11: Q <= ~Q;
-        endcase
-        QB <= ~Q;
-    end
-endmodule
-
-`timescale 1ns / 1ps
-module jkff_TB;
-    reg J, K, CLK;
-    wire Q, QB;
-    jkff uut (.Q(Q), .QB(QB), .J(J), .K(K), .CLK(CLK));
-    initial CLK = 0;
-    always #10 CLK = ~CLK;
-    initial begin
-        J = 0; K = 0; #20;
-        J = 0; K = 1; #20;
-        J = 1; K = 0; #20;
-        J = 1; K = 1; #20;
-        J = 0; K = 0; #20;
-        J = 1; K = 1; #20;
-        $stop;
-    end
-endmodule
-</pre>
-
-<h2>T Flip-Flop</h2>
-<pre>
-module t_ff(Q, QB, T, CLK);
-input T, CLK;
-output Q, QB;
-reg Q, QB;
-always @(posedge CLK)
-begin
-if (T)
-Q = ~Q;
-QB = ~Q;
-end
-endmodule
-
-module t_ff_TB;
-reg T;
-reg CLK;
-wire Q;
-wire QB;
-t_ff uut(.Q(Q), .QB(QB), .T(T), .CLK(CLK));
-always #100 CLK = ~CLK;
-initial begin
-CLK = 0;
-T = 0;
-#200 T = 1;
-#200 T = 0;
-#200 T = 1;
-#200 T = 0;
-#200 $stop;
-end
-endmodule
-</pre>
-
-<h2>Shift Register (PISO)</h2>
-<pre>
-module piso(CLK, D, Q, SHIFT_LOAD);
-input CLK, SHIFT_LOAD;
-input [3:0] D;
-output Q;
-reg Q;
-reg [3:0] TEMP;
-
-always @(posedge CLK)
-begin
-  if (SHIFT_LOAD == 1'b0)
-  begin
-    Q <= 1'b0;
-    TEMP <= D;
-  end
-  else
-  begin
-    Q <= TEMP[0];
-    TEMP <= TEMP >> 1;
-  end
-end
-endmodule
-
-module piso_tb;
-reg CLK, SHIFT_LOAD;
-reg [3:0] D;
-wire Q;
-
-piso uut(.CLK(CLK), .D(D), .Q(Q), .SHIFT_LOAD(SHIFT_LOAD));
-
-initial CLK = 1'b1;
-always #100 CLK = ~CLK;
-
-initial begin
-  D = 4'b1101;
-  SHIFT_LOAD = 1'b0; #200;
-  SHIFT_LOAD = 1'b1; #1200; D = 4'b1001;
-  SHIFT_LOAD = 1'b0; #200;
-  SHIFT_LOAD = 1'b1; #1000 $stop;
-end
-endmodule
-</pre>
+            // Add the image to the container
+            container.appendChild(img);
+        }
+    </script>
 
 </body>
 </html>
