@@ -306,6 +306,149 @@ plot(n,f2);
 title('Demodulated Signal')
 xlabel('Seconds');
 ylabel('Amplitude');
+
+PULSE AMPLITUDE MODULATION (PAM) - METHOD 1 (Ideal Sampling)
+clc; clear; close all;
+a = input('Enter message amplitude ='); 
+f = input('Enter message frequency = '); 
+t = 0:0.02:2; 
+imp = ones(size(t)); 
+x2 = a*sin(2*pi*f*t); 
+y = imp.*x2; 
+
+figure(1)
+subplot(3,1,1)
+stem(t,imp, 'filled');
+title('Sampling Pulse Train');
+xlabel('Time'); ylabel('Amplitude');
+
+subplot(3,1,2)
+plot(t,x2); 
+title('Message Signal');
+xlabel('Time'); ylabel('Amplitude');
+
+subplot(3,1,3)
+stem(t,y, 'filled'); 
+title('PAM Signal (Ideal Sampling)');
+xlabel('Time'); ylabel('Amplitude');
+
+PULSE AMPLITUDE MODULATION (PAM) - METHOD 2 (Natural PAM)
+clc; clear; close all;
+fm = input('Enter message frequency:'); 
+fc = input('Enter carrier frequency:'); 
+vm = input('Enter message amplitude:'); 
+t = 0:1/1000:0.5; 
+m = vm*sin(2*pi*fm*t); 
+c = square(2*pi*fc*t); 
+c(c==-1) = 0; 
+y = c.*m; 
+
+figure(2)
+subplot(3,1,1)
+plot(t,m); title('Message Signal');
+
+subplot(3,1,2)
+plot(t,c); title('Sampling Pulse Train');
+
+subplot(3,1,3)
+plot(t,y); title('Natural PAM Signal');
+
+N = 20; 
+demod = conv(y, ones(1,N)/N, 'same'); 
+figure(6)
+subplot(2,1,1)
+plot(t,y)
+title('Natural PAM Signal')
+subplot(2,1,2)
+plot(t, demod, 'r')
+title('Recovered Message Signal (Simple LPF)')
+
+PULSE WIDTH MODULATION (PWM) - METHOD 1 (Comparator Method)
+clc; clear; close all;
+t = 0:0.001:2; 
+msg = sin(2*pi*1*t); 
+carrier = sawtooth(2*pi*20*t); 
+
+figure(3)
+subplot(3,1,1)
+plot(t,msg); title('Message Signal');
+
+subplot(3,1,2)
+plot(t,carrier); title('Triangular Carrier');
+
+u = zeros(size(t)); 
+for i = 1:length(t)
+    if msg(i) >= carrier(i) 
+        u(i) = 1;
+    else
+        u(i) = 0;
+    end
+end
+
+subplot(3,1,3)
+plot(t,u);
+ylim([-0.1 1.1])
+title('PWM Signal');
+
+N = 50; 
+demod_pwm = conv(u, ones(1,N)/N, 'same'); 
+figure(7)
+subplot(2,1,1)
+plot(t,u)
+title('PWM Signal')
+subplot(2,1,2)
+plot(t,demod_pwm,'r')
+title('Recovered Message from PWM (Simple LPF)')
+xlabel('Time'); ylabel('Amplitude');
+
+PULSE WIDTH MODULATION (PWM) - METHOD 2 (Built-in Modulation)
+t = 0:0.01:1;
+y = 0.5 + 0.5*sin(8*pi*t); 
+
+figure(4)
+subplot(2,1,1)
+plot(t,y);
+title('Message Signal');
+
+x = modulate(y, 40, 100, 'pwm','centered'); 
+
+subplot(2,1,2)
+plot((0:length(x)-1)/length(x),x);
+title('PWM Signal using modulate()');
+
+PULSE POSITION MODULATION (PPM)
+clc; clear; close all;
+t = 0:0.01:5;
+msg = sin(2*pi*1*t); 
+carrier = sawtooth(2*pi*4*t); 
+
+figure(5)
+subplot(4,1,1)
+plot(t, msg); title('Message Signal');
+
+subplot(4,1,2)
+plot(t,carrier); title('Sawtooth Carrier');
+ylim([-0.1 1.1])
+
+u = zeros(size(t)); 
+for i = 1:length(t)
+    if msg(i) >= carrier(i)
+        u(i) = 1;
+    else
+        u(i) = 0;
+    end
+end
+
+subplot(4,1,3)
+plot(t,u); title('PWM Signal');
+
+q = [0 diff(u)]; 
+ppm = zeros(size(t));
+ppm(q == 1) = 1; 
+
+subplot(4,1,4)
+plot(t,ppm); title('PPM Signal');
+ylim([-0.1 1.1])
 </pre>
 
 </body>
